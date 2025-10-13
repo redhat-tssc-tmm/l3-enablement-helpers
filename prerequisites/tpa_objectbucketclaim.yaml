@@ -1,0 +1,7 @@
+apiVersion: objectbucket.io/v1alpha1
+kind: ObjectBucketClaim
+metadata:
+  name: tpa-bucket-claim
+spec:
+  generateBucketName: trustify
+  storageClassName: openshift-storage.noobaa.io
