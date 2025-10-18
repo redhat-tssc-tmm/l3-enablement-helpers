@@ -77,14 +77,14 @@ spec:
   oidc:
     clients:
       cli:
-        clientId: cli
+        clientId: tpa-cli
         clientSecret:
           valueFrom:
             secretKeyRef:
               key: client-secret
               name: oidc-cli
       frontend:
-        clientId: frontend
+        clientId: tpa-frontend
     issuerUrl: 'https://sso.<your-cluster-ingressdomain-here>/realms/trusted-artifact-signer'
   tls: {}
   image:
