@@ -1,0 +1,168 @@
+﻿apiVersion: rhtpa.io/v1
+kind: TrustedProfileAnalyzer
+metadata:
+  name: trustedprofileanalyzer-l3-student
+
+spec:
+  tracing:
+    enabled: false
+  metrics:
+    enabled: false
+  infrastructure:
+    port: 9010
+  rust: {}
+  appDomain: -student-tpa-operator.<your-cluster-ingressdomain-here>
+  modules:
+    createDatabase:
+      enabled: true
+    createImporters:
+      enabled: true
+      importers:
+        cve:
+          cve:
+            description: CVE list v5
+            disabled: false
+            period: 1d
+            source: 'https://github.com/CVEProject/cvelistV5'
+        osv-github:
+          osv:
+            description: GitHub Advisory Database
+            disabled: false
+            path: advisories
+            period: 1d
+            source: 'https://github.com/github/advisory-database'
+        quay-redhat-user-workloads:
+          quay:
+            description: SBOMs from build image attachments
+            disabled: true
+            namespace: redhat-user-workloads
+            period: 1d
+            source: quay.io
+        redhat-csaf:
+          csaf:
+            description: All Red Hat CSAF data
+            disabled: true
+            fetchRetries: 50
+            period: 1d
+            source: redhat.com
+        redhat-sboms:
+          sbom:
+            description: All Red Hat SBOMs
+            disabled: true
+            fetchRetries: 50
+            keys:
+              - 'https://access.redhat.com/security/data/97f5eac4.txt#77E79ABE93673533ED09EBE2DCE3823597F5EAC4'
+            period: 1d
+            source: 'https://access.redhat.com/security/data/sbom/beta/'
+    migrateDatabase:
+      enabled: true
+    server:
+      enabled: true
+      tracing: {}
+      metrics: {}
+      infrastructure: {}
+      rust: {}
+      resources:
+        requests:
+          cpu: 1
+          memory: 8Gi
+      ingress: {}
+      image: {}
+      replicas: 1
+  partOf: trustify
+  collector: {}
+  ingress: {}
+  openshift:
+    useServiceCa: true
+  oidc:
+    clients:
+      cli:
+        clientId: cli
+        clientSecret:
+          valueFrom:
+            secretKeyRef:
+              key: client-secret
+              name: oidc-cli
+      frontend:
+        clientId: frontend
+    issuerUrl: 'https://sso.<your-cluster-ingressdomain-here>/realms/trusted-artifact-signer'
+  tls: {}
+  image:
+    fullName: 'registry.redhat.io/rhtpa/rhtpa-trustification-service-rhel9@sha256:d5cf4a5bff94b59197f668a63d29591e3bc92ee89402edc70039e592d75cb84e'
+    pullPolicy: IfNotPresent
+  database:
+    #sslMode: require
+    host:
+      valueFrom:
+        secretKeyRef:
+          key: db.host
+          name: tpa-postgresql-credentials
+    name:
+      valueFrom:
+        secretKeyRef:
+          key: db.name
+          name: tpa-postgresql-credentials
+    password:
+      valueFrom:
+        secretKeyRef:
+          key: db.password
+          name: tpa-postgresql-credentials
+    port:
+      valueFrom:
+        secretKeyRef:
+          key: db.port
+          name: tpa-postgresql-credentials
+    username:
+      valueFrom:
+        secretKeyRef:
+          key: db.user
+          name: tpa-postgresql-credentials
+  createDatabase:
+    name:
+      valueFrom:
+        secretKeyRef:
+          name: tpa-postgresql-credentials
+          key: db.name
+    username:
+      valueFrom:
+        secretKeyRef:
+          name: tpa-postgresql-credentials
+          key: db.admin
+    password:
+      valueFrom:
+        secretKeyRef:
+          name: tpa-postgresql-credentials
+          key: db.adminpassword
+
+  migrateDatabase:
+    username:
+      valueFrom:
+        secretKeyRef:
+          name: tpa-postgresql-credentials
+          key: db.admin
+    password:
+      valueFrom:
+        secretKeyRef:
+          name: tpa-postgresql-credentials
+          key: db.adminpassword
+
+#alternatively, uncomment for filesystem / PVC storage
+#  storage:
+#    type: filesystem
+#    size: 32Gi
+
+  storage:
+    accessKey:
+      valueFrom:
+        secretKeyRef:
+          key: AWS_ACCESS_KEY_ID
+          name: tpa-bucket-claim
+    bucket: trustify-<run_s3.sh_from_your_namespace_to_get_the_bucket_name>
+    region: https://s3-openshift-storage.<your-cluster-ingressdomain-here>:443
+    secretKey:
+      valueFrom:
+        secretKeyRef:
+          key: AWS_SECRET_ACCESS_KEY
+          name: tpa-bucket-claim
+    type: s3
+  replicas: 1
