@@ -1,35 +1,62 @@
 {
-    "clientId": "frontend",
-    "clientAuthenticatorType": "client-secret",
-    "enabled": true,
-    "publicClient": true,
-    "implicitFlowEnabled": true,
-    "standardFlowEnabled": true,
-    "directAccessGrantsEnabled": false,
-    "serviceAccountsEnabled": false,
-    "fullScopeAllowed": true,
-    "webOrigins": [
-      "*"
-    ],
-    "defaultClientScopes": [
-      "basic",
-      "email",
-      "profile",
-      "roles",
-      "web-origins",
-      "create:document",
-      "read:document",
-      "update:document",
-      "delete:document"
-    ],
-    "optionalClientScopes": [
-      "address",
-      "microprofile-jwt",
-      "offline_access",
-      "phone"
-    ],
-    "attributes": {
-      "access.token.lifespan": "300",
-      "post.logout.redirect.uris": "+"
-    }
+  "clientId": "tpa-frontend",
+  "name": "TPA UI Client",
+  "description": "User Authn and Authz for the TPA Frontend",
+  "rootUrl": "",
+  "adminUrl": "",
+  "baseUrl": "",
+  "surrogateAuthRequired": false,
+  "enabled": true,
+  "alwaysDisplayInConsole": false,
+  "clientAuthenticatorType": "client-secret",
+  "redirectUris": [
+    "https://server-l3-enablement-tpa.apps.cluster-mdt2d.dynamic.redhatworkshops.io",
+    "https://server-l3-enablement-tpa.apps.cluster-mdt2d.dynamic.redhatworkshops.io/*"
+  ],
+  "webOrigins": [
+    "*"
+  ],
+  "notBefore": 0,
+  "bearerOnly": false,
+  "consentRequired": false,
+  "standardFlowEnabled": true,
+  "implicitFlowEnabled": true,
+  "directAccessGrantsEnabled": false,
+  "serviceAccountsEnabled": false,
+  "publicClient": true,
+  "frontchannelLogout": false,
+  "protocol": "openid-connect",
+  "attributes": {
+    "access.token.lifespan": "300",
+    "oidc.ciba.grant.enabled": "false",
+    "backchannel.logout.session.required": "true",
+    "post.logout.redirect.uris": "+",
+    "oauth2.device.authorization.grant.enabled": "false",
+    "display.on.consent.screen": "false",
+    "backchannel.logout.revoke.offline.tokens": "false"
+  },
+  "authenticationFlowBindingOverrides": {},
+  "fullScopeAllowed": true,
+  "nodeReRegistrationTimeout": -1,
+  "defaultClientScopes": [
+    "web-origins",
+    "delete:document",
+    "profile",
+    "roles",
+    "read:document",
+    "update:document",
+    "email",
+    "create:document"
+  ],
+  "optionalClientScopes": [
+    "address",
+    "phone",
+    "offline_access",
+    "microprofile-jwt"
+  ],
+  "access": {
+    "view": true,
+    "configure": true,
+    "manage": true
   }
+}

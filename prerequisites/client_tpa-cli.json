@@ -1,32 +1,102 @@
 {
-  "clientId": "cli",
-  "clientAuthenticatorType": "client-secret",
+  "clientId": "tpa-cli",
+  "name": "TPA cli Client",
+  "description": "OIDC Service Account Authn and Authz for the TPA Rest API",
+  "surrogateAuthRequired": false,
   "enabled": true,
-  "publicClient": false,
-  "implicitFlowEnabled": false,
+  "alwaysDisplayInConsole": false,
+  "clientAuthenticatorType": "client-secret",
+  "secret": "SuTQThQk-68Lu-d7U1-R0co-ze2DBZ9EDPxP",
+  "redirectUris": [],
+  "webOrigins": [],
+  "notBefore": 0,
+  "bearerOnly": false,
+  "consentRequired": false,
   "standardFlowEnabled": false,
+  "implicitFlowEnabled": false,
   "directAccessGrantsEnabled": false,
   "serviceAccountsEnabled": true,
+  "publicClient": false,
+  "frontchannelLogout": false,
+  "protocol": "openid-connect",
+  "attributes": {
+    "access.token.lifespan": "300",
+    "oidc.ciba.grant.enabled": "false",
+    "client.secret.creation.time": "1710855207",
+    "backchannel.logout.session.required": "true",
+    "post.logout.redirect.uris": "+",
+    "oauth2.device.authorization.grant.enabled": "false",
+    "backchannel.logout.revoke.offline.tokens": "false"
+  },
+  "authenticationFlowBindingOverrides": {},
   "fullScopeAllowed": true,
+  "nodeReRegistrationTimeout": -1,
+  "protocolMappers": [
+    {
+      "name": "Client ID",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usersessionmodel-note-mapper",
+      "consentRequired": false,
+      "config": {
+        "user.session.note": "client_id",
+        "introspection.token.claim": "true",
+        "userinfo.token.claim": "true",
+        "id.token.claim": "true",
+        "access.token.claim": "true",
+        "claim.name": "client_id",
+        "jsonType.label": "String"
+      }
+    },
+    {
+      "name": "Client IP Address",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usersessionmodel-note-mapper",
+      "consentRequired": false,
+      "config": {
+        "user.session.note": "clientAddress",
+        "introspection.token.claim": "true",
+        "userinfo.token.claim": "true",
+        "id.token.claim": "true",
+        "access.token.claim": "true",
+        "claim.name": "clientAddress",
+        "jsonType.label": "String"
+      }
+    },
+    {
+      "name": "Client Host",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usersessionmodel-note-mapper",
+      "consentRequired": false,
+      "config": {
+        "user.session.note": "clientHost",
+        "introspection.token.claim": "true",
+        "userinfo.token.claim": "true",
+        "id.token.claim": "true",
+        "access.token.claim": "true",
+        "claim.name": "clientHost",
+        "jsonType.label": "String"
+      }
+    }
+  ],
   "defaultClientScopes": [
-    "basic",
-    "email",
+    "web-origins",
+    "delete:document",
     "profile",
     "roles",
-    "web-origins",
-    "create:document",
     "read:document",
     "update:document",
-    "delete:document"
+    "email",
+    "create:document"
   ],
   "optionalClientScopes": [
     "address",
-    "microprofile-jwt",
+    "phone",
     "offline_access",
-    "phone"
+    "microprofile-jwt"
   ],
-  "attributes": {
-    "access.token.lifespan": "300",
-    "post.logout.redirect.uris": "+"
+  "access": {
+    "view": true,
+    "configure": true,
+    "manage": true
   }
 }
