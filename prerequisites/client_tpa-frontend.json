@@ -10,8 +10,10 @@
   "alwaysDisplayInConsole": false,
   "clientAuthenticatorType": "client-secret",
   "redirectUris": [
-    "https://server-l3-enablement-tpa.apps.cluster-mdt2d.dynamic.redhatworkshops.io",
-    "https://server-l3-enablement-tpa.apps.cluster-mdt2d.dynamic.redhatworkshops.io/*"
+    "https://server-student-tpa-operator.<your-ingress-domain-here>",
+    "https://server-student-tpa-operator.<your-ingress-domain-here>/*",
+    "https://server-student-tpa-helm.<your-ingress-domain-here>",
+    "https://server-student-tpa-helm.<your-ingress-domain-here>/*"
   ],
   "webOrigins": [
     "*"
