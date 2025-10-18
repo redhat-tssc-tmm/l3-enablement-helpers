@@ -10,10 +10,10 @@
   "alwaysDisplayInConsole": false,
   "clientAuthenticatorType": "client-secret",
   "redirectUris": [
-    "https://server-student-tpa-operator.<your-ingress-domain-here>",
-    "https://server-student-tpa-operator.<your-ingress-domain-here>/*",
-    "https://server-student-tpa-helm.<your-ingress-domain-here>",
-    "https://server-student-tpa-helm.<your-ingress-domain-here>/*"
+    "https://server-student-tpa-operator.replace.me",
+    "https://server-student-tpa-operator.replace.me/*",
+    "https://server-student-tpa-helm.replace.me",
+    "https://server-student-tpa-helm.replace.me/*"
   ],
   "webOrigins": [
     "*"
