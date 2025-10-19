@@ -24,7 +24,9 @@ echo "Access Token: "
 echo "=================================================================================================="
 echo ${TOKEN}
 echo "=================================================================================================="
-
+echo ""
+echo "Uploading homebanking SBOM"
+echo ""
 # Set the TPA endpoint
 TPA_URL="https://server-student-tpa-operator.${INGRESS_DOMAIN}"
 
