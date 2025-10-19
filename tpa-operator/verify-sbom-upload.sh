@@ -25,5 +25,11 @@ echo "==========================================================================
 echo ${TOKEN}
 echo "=================================================================================================="
 
+# Set the TPA endpoint
+TPA_URL="https://server-student-tpa-operator.${INGRESS_DOMAIN}"
 
-
+# upload the SBOM with additional labels
+curl -X POST "${TPA_URL}/api/v2/sbom?labels.environment=verification&labels.team=students&labels.application=homebanking&labels.source=maven-plugin" \
+    -H "Authorization: Bearer ${TOKEN}" \
+    -H "Content-Type: application/json" \
+    --data-binary @home-banking-sbom.json
