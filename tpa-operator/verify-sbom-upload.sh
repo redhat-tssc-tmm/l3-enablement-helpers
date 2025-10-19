@@ -35,3 +35,5 @@ curl -X POST "${TPA_URL}/api/v2/sbom?labels.environment=verification&labels.team
     -H "Authorization: Bearer ${TOKEN}" \
     -H "Content-Type: application/json" \
     --data-binary @home-banking-sbom.json
+
+echo ""
