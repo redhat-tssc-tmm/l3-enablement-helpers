@@ -18,8 +18,12 @@ TOKEN=$(curl -s -X POST "${ISSUER_URL}/protocol/openid-connect/token" \
   -d "grant_type=client_credentials" \
   -d "client_id=${CLIENT_ID}" \
   -d "client_secret=${CLIENT_SECRET}" \
-  -d "scope=create:document" \
   | jq -r '.access_token')
 
-echo "Token: ${TOKEN}"
+echo "Access Token: "
+echo "=================================================================================================="
+echo ${TOKEN}
+echo "=================================================================================================="
+
+
 
