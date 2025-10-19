@@ -1,14 +1,19 @@
-#!/bin/bash 
-
+#!/bin/bash
 
 CLAIM="tpa-bucket-claim"
 
-echo "Access Key ID:"
+echo -n "Access Key ID: "
 oc get secret $CLAIM -o jsonpath='{.data.AWS_ACCESS_KEY_ID}' | base64 -d
-echo -e "\n\nSecret Access Key:"
+echo ""
+
+echo -n "Secret Access Key: "
 oc get secret $CLAIM -o jsonpath='{.data.AWS_SECRET_ACCESS_KEY}' | base64 -d
-echo -e "\n\nEndpoint:"
+echo ""
+
+echo -n "Endpoint: "
 oc get route s3 -n openshift-storage -o jsonpath='https://{.spec.host}'
-echo -e "\n\nBucket Name:"
+echo ""
+
+echo -n "Bucket Name: "
 oc get configmap $CLAIM -o jsonpath='{.data.BUCKET_NAME}'
-echo -e "\n"
+echo ""
