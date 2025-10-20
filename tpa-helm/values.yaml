@@ -1,0 +1,97 @@
+appDomain: $APP_DOMAIN_URL
+
+ingress:
+  className: openshift-default
+  additionalAnnotations:
+    "haproxy.router.openshift.io/timeout": "5m"
+
+storage:
+  type: s3
+  region: https://s3-openshift-storage.<your-cluster-ingressdomain-here>:443
+  bucket: trustify-<run_s3.sh_from_your_namespace_to_get_the_bucket_name>
+  accessKey:
+    valueFrom:
+      secretKeyRef:
+        name: tpa-bucket-claim
+        key: AWS_ACCESS_KEY_ID
+  secretKey:
+    valueFrom:
+      secretKeyRef:
+        name: tpa-bucket-claim
+        key: AWS_SECRET_ACCESS_KEY
+
+database:
+  #sslMode: require
+  host:
+    valueFrom:
+      secretKeyRef:
+        name: tpa-postgresql-credentials
+        key: db.host
+  port:
+    valueFrom:
+      secretKeyRef:
+        name: tpa-postgresql-credentials
+        key: db.port
+  name:
+    valueFrom:
+      secretKeyRef:
+        name: tpa-postgresql-credentials
+        key: db.name
+  username:
+    valueFrom:
+      secretKeyRef:
+        name: tpa-postgresql-credentials
+        key: db.user
+  password:
+    valueFrom:
+      secretKeyRef:
+        name: tpa-postgresql-credentials
+        key: db.password
+
+createDatabase:
+  name:
+    valueFrom:
+      secretKeyRef:
+        name: tpa-postgresql-credentials
+        key: db.name
+  username:
+    valueFrom:
+      secretKeyRef:
+        name: tpa-postgresql-credentials
+        key: db.admin
+  password:
+    valueFrom:
+      secretKeyRef:
+        name: tpa-postgresql-credentials
+        key: db.adminpassword
+
+migrateDatabase:
+  username:
+    valueFrom:
+      secretKeyRef:
+        name: tpa-postgresql-credentials
+        key: db.admin
+  password:
+    valueFrom:
+      secretKeyRef:
+        name: tpa-postgresql-credentials
+        key: db.adminpassword
+
+modules:
+  createDatabase:
+    enabled: true
+  migrateDatabase:
+    enabled: true
+
+oidc:
+  issuerUrl: https://sso.<your-cluster-ingressdomain-here>/realms/trusted-artifact-signer
+  clients:
+    frontend:
+      clientId: tpa-frontend
+    cli:
+      clientId: tpa-cli
+      clientSecret:
+        valueFrom:
+          secretKeyRef:
+            name: oidc-cli
+            key: client-secret
