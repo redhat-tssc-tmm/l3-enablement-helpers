@@ -1,0 +1,128 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: podman-terminal
+  labels:
+    name: podman-terminal
+
+---
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: terminal-admin
+  namespace: podman-terminal
+automountServiceAccountToken: true
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: terminal-admin-cluster-binding
+subjects:
+- kind: ServiceAccount
+  name: terminal-admin
+  namespace: podman-terminal
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+  apiGroup: rbac.authorization.k8s.io
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ttyd-admin-terminal
+  namespace: podman-terminal
+  labels:
+    app: ttyd-admin-terminal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ttyd-admin-terminal
+  template:
+    metadata:
+      labels:
+        app: ttyd-admin-terminal
+    spec:
+      serviceAccountName: terminal-admin
+      automountServiceAccountToken: true
+      containers:
+      - name: ttyd
+        image: quay.io/tssc_demos/ttyd-admin-terminal:latest
+        ports:
+        - containerPort: 7681
+          protocol: TCP
+        env:
+        - name: TERM
+          value: "xterm-256color"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1001
+        volumeMounts:
+        - name: workspace
+          mountPath: /workspace
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 7681
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 7681
+          initialDelaySeconds: 10
+          periodSeconds: 5
+      volumes:
+      - name: workspace
+        emptyDir: {}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: ttyd-admin-service
+  namespace: podman-terminal
+  labels:
+    app: ttyd-admin-terminal
+spec:
+  selector:
+    app: ttyd-admin-terminal
+  ports:
+  - name: web
+    port: 80
+    targetPort: 7681
+    protocol: TCP
+  type: ClusterIP
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: admin-terminal
+  namespace: podman-terminal
+  labels:
+    app: ttyd-admin-terminal
+spec:
+  to:
+    kind: Service
+    name: ttyd-admin-service
+    weight: 100
+  port:
+    targetPort: web
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None
