@@ -98,8 +98,7 @@ spec:
             memory: "512Mi"
             cpu: "500m"
         securityContext:
-          allowPrivilegeEscalation: false
-          runAsNonRoot: true
+          privileged: true
           runAsUser: 1001
         volumeMounts:
         - name: workspace
