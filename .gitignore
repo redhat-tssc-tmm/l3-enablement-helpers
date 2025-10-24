@@ -1,0 +1,2 @@
+# Ignore generated deployment file with secrets
+tas-verification/podman-terminal.yaml
