@@ -2,6 +2,8 @@
 
 set -e
 
+echo "Setting up \"Podman Terminal\" with OAuth Configuration "
+echo "========================================================"
 echo "Extracting OAuth configuration from OpenShift cluster..."
 
 # Get OIDC client ID from OAuth configuration
@@ -81,7 +83,7 @@ echo "  - Generated cookie secret"
 echo ""
 
 # Apply the configuration to the cluster
-echo "Deploying to OpenShift cluster..."
+echo "Deploying podman-terminal.yaml to OpenShift cluster..."
 oc apply -f podman-terminal.yaml
 
 echo ""
