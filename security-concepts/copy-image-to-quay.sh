@@ -19,7 +19,7 @@ echo "Quay URL: $QUAY_URL"
 
 # Extract Quay admin token from secret
 echo "Retrieving Quay admin token from secret..."
-QUAY_ADMIN_TOKEN=$(oc get secret quay-admin-token -n quay-enterprise -o jsonpath='{.data.QUAY_ADMIN_TOKEN}' | base64 -d)
+QUAY_ADMIN_TOKEN=$(oc get secret quay-admin-token -n quay-enterprise -o jsonpath='{.data.token}' | base64 -d)
 if [ -z "$QUAY_ADMIN_TOKEN" ]; then
     echo "Error: Could not extract QUAY_ADMIN_TOKEN from secret"
     exit 1
