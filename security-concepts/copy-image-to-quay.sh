@@ -64,6 +64,21 @@ if [ $? -eq 0 ]; then
     echo "Destination: $DEST_IMAGE"
     echo "Image URL: $QUAY_URL/repository/l3-students/l3-rhads-demoimage"
     echo "================================"
+    echo ""
+
+    # Export IMAGE variable
+    export IMAGE="$DEST_IMAGE"
+    echo "Exported IMAGE variable: $IMAGE"
+    echo ""
+    echo "IMPORTANT: To use the \$IMAGE variable in your shell,"
+    echo "you must SOURCE this script instead of executing it:"
+    echo ""
+    echo "  source ./copy-image-to-quay.sh"
+    echo "  OR"
+    echo "  . ./copy-image-to-quay.sh"
+    echo ""
+    echo "After sourcing, \$IMAGE will be available in your current shell."
+    echo "================================"
 else
     echo ""
     echo "Error: Failed to copy image"
