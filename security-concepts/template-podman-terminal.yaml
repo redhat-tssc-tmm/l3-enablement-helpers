@@ -1,0 +1,254 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ttyd
+  labels:
+    name: ttyd
+
+---
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: terminal-admin
+  namespace: ttyd
+automountServiceAccountToken: true
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: terminal-admin-cluster-binding
+subjects:
+- kind: ServiceAccount
+  name: terminal-admin
+  namespace: ttyd
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+  apiGroup: rbac.authorization.k8s.io
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: system:openshift:scc:privileged-terminal
+rules:
+- apiGroups:
+  - security.openshift.io
+  resourceNames:
+  - privileged
+  resources:
+  - securitycontextconstraints
+  verbs:
+  - use
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: terminal-admin-privileged-scc
+  namespace: ttyd
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:openshift:scc:privileged-terminal
+subjects:
+- kind: ServiceAccount
+  name: terminal-admin
+  namespace: ttyd
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: keycloak-oauth-secret
+  namespace: ttyd
+type: Opaque
+stringData:
+  # Replace these values with your actual Keycloak configuration
+  client-id: {{oidc-client-id}}
+  client-secret: {{oidc-client-secret}}
+  cookie-secret: {{cookie-secret}}  # Generate with: openssl rand -base64 24
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oauth2-proxy-config
+  namespace: ttyd
+data:
+  oauth2_proxy.cfg: |
+    # OAuth Provider Configuration
+    provider = "keycloak-oidc"
+
+    # Replace with your Keycloak URL and realm
+    oidc_issuer_url = "{{oidc-issuer-url}}"
+
+    # Redirect URL (update with your actual route hostname)
+    redirect_url = "https://admin-terminal-ttyd{{cluster-ingress-domain}}/oauth2/callback"
+
+    # Skip OIDC audience validation (Keycloak sends "account" instead of client ID)
+    skip_oidc_discovery = false
+    oidc_extra_audiences = ["account"]
+
+    # Skip splash page and go directly to sign-in
+    skip_provider_button = true
+
+    # Upstream to proxy to (ttyd on localhost)
+    upstreams = ["http://127.0.0.1:7681"]
+
+    # Security settings
+    cookie_secure = true
+    cookie_httponly = true
+    cookie_samesite = "lax"
+
+    # Email domains to allow (use * for any)
+    email_domains = ["*"]
+
+    # Logging
+    standard_logging = true
+    request_logging = true
+    auth_logging = true
+
+    # HTTP settings
+    http_address = "0.0.0.0:4180"
+
+    # Skip authentication for health checks
+    skip_auth_routes = ["^/ping$"]
+
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ttyd-admin-terminal
+  namespace: ttyd
+  labels:
+    app: ttyd-admin-terminal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ttyd-admin-terminal
+  template:
+    metadata:
+      labels:
+        app: ttyd-admin-terminal
+    spec:
+      serviceAccountName: terminal-admin
+      automountServiceAccountToken: true
+      containers:
+      - name: oauth2-proxy
+        image: quay.io/oauth2-proxy/oauth2-proxy:v7.6.0
+        args:
+        - --config=/etc/oauth2-proxy/oauth2_proxy.cfg
+        ports:
+        - containerPort: 4180
+          name: oauth-proxy
+          protocol: TCP
+        env:
+        - name: OAUTH2_PROXY_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: keycloak-oauth-secret
+              key: client-id
+        - name: OAUTH2_PROXY_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: keycloak-oauth-secret
+              key: client-secret
+        - name: OAUTH2_PROXY_COOKIE_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: keycloak-oauth-secret
+              key: cookie-secret
+        volumeMounts:
+        - name: oauth-config
+          mountPath: /etc/oauth2-proxy
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+      - name: ttyd
+        image: quay.io/tssc_demos/ttyd-admin-terminal:latest
+        ports:
+        - containerPort: 7681
+          protocol: TCP
+        env:
+        - name: TERM
+          value: "xterm-256color"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        securityContext:
+          privileged: true
+          runAsUser: 1001
+        volumeMounts:
+        - name: workspace
+          mountPath: /workspace
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 7681
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 7681
+          initialDelaySeconds: 10
+          periodSeconds: 5
+      volumes:
+      - name: workspace
+        emptyDir: {}
+      - name: oauth-config
+        configMap:
+          name: oauth2-proxy-config
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: ttyd-admin-service
+  namespace: ttyd
+  labels:
+    app: ttyd-admin-terminal
+spec:
+  selector:
+    app: ttyd-admin-terminal
+  ports:
+  - name: web
+    port: 80
+    targetPort: 4180
+    protocol: TCP
+  type: ClusterIP
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: admin-terminal
+  namespace: ttyd
+  labels:
+    app: ttyd-admin-terminal
+spec:
+  to:
+    kind: Service
+    name: ttyd-admin-service
+    weight: 100
+  port:
+    targetPort: web
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None
