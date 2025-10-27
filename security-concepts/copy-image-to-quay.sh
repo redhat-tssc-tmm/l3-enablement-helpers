@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+#set -e
 
 echo "Copying Image to Local Quay Registry"
 echo "====================================="

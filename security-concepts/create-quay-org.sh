@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+#set -e
 
 echo "Creating Quay Organization 'l3-students'"
 echo "========================================="

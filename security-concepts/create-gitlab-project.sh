@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+#set -e
 
 echo "Creating GitLab Group 'l3-students' and Project 'signing-and-verification'"
 echo "=========================================================================="
