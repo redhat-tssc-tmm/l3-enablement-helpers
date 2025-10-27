@@ -66,18 +66,20 @@ if [ $? -eq 0 ]; then
     echo "================================"
     echo ""
 
-    # Export IMAGE variable
+    # Export IMAGE and QUAY variables
     export IMAGE="$DEST_IMAGE"
+    export QUAY="$QUAY_HOST"
     echo "Exported IMAGE variable: $IMAGE"
+    echo "Exported QUAY variable: $QUAY"
     echo ""
-    echo "IMPORTANT: To use the \$IMAGE variable in your shell,"
+    echo "IMPORTANT: To use the \$IMAGE and \$QUAY variables in your shell,"
     echo "you must SOURCE this script instead of executing it:"
     echo ""
     echo "  source ./copy-image-to-quay.sh"
     echo "  OR"
     echo "  . ./copy-image-to-quay.sh"
     echo ""
-    echo "After sourcing, \$IMAGE will be available in your current shell."
+    echo "After sourcing, \$IMAGE and \$QUAY will be available in your current shell."
     echo "================================"
 else
     echo ""
