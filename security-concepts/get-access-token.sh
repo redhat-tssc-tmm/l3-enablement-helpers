@@ -23,3 +23,4 @@ TOKEN=$(curl -s -X POST "${ISSUER_URL}/protocol/openid-connect/token" \
   | jq -r '.access_token')
 
 echo "Access Token: ${TOKEN}"
+
