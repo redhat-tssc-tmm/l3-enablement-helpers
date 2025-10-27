@@ -22,5 +22,14 @@ TOKEN=$(curl -s -X POST "${ISSUER_URL}/protocol/openid-connect/token" \
   -d "password=${PASSWORD}" \
   | jq -r '.access_token')
 
-echo "Access Token: ${TOKEN}"
+echo "Access Token: "
+echo "============================================================================================================="
+echo ${TOKEN}
+echo "============================================================================================================="
+echo ""
+echo "Decoded Token (it's a JWT, after all)"
+echo "-------------------------------------------------------------------------------------------------------------"
+# Decode the token payload
+echo $TOKEN | jq -R 'split(".") | .[1] | @base64d | fromjson'
 
+export SIGSTORE_ID_TOKEN=$TOKEN

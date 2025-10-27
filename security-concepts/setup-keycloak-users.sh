@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+#set -e
 
 echo "Setting up Keycloak Users and Groups"
 echo "====================================="
