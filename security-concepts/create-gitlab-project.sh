@@ -97,13 +97,13 @@ fi
 
 echo ""
 
-# Add user1 to group as Developer (access_level: 30)
+# Add user1 to group as Owner (access_level: 50)
 if [ -n "$USER1_ID" ]; then
     echo "Adding user1 to group 'l3-students'..."
     USER1_MEMBER_RESPONSE=$(curl -k -X POST \
         -H "PRIVATE-TOKEN: $GITLAB_TOKEN" \
         -H "Content-Type: application/json" \
-        -d "{\"user_id\": $USER1_ID, \"access_level\": 30}" \
+        -d "{\"user_id\": $USER1_ID, \"access_level\": 50}" \
         "$GITLAB_URL/api/v4/groups/$GROUP_ID/members" \
         -w "\n%{http_code}" \
         -s)
