@@ -27,6 +27,16 @@ fi
 echo "Quay Admin Token: [REDACTED]"
 echo ""
 
+# Login to Quay with cosign
+echo "Logging into Quay registry with cosign..."
+cosign login -u '$oauthtoken' -p "$QUAY_ADMIN_TOKEN" "$QUAY_HOST" 2>/dev/null
+if [ $? -eq 0 ]; then
+    echo "Cosign successfully logged into Quay registry"
+else
+    echo "Warning: cosign login failed, but continuing with skopeo..."
+fi
+echo ""
+
 # Source and destination image details
 SOURCE_IMAGE="quay.io/tssc_demos/l3-rhads-demoimage:latest"
 DEST_IMAGE="$QUAY_HOST/l3-students/l3-rhads-demoimage:latest"
