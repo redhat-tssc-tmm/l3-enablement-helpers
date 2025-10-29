@@ -1,0 +1,17 @@
+{
+  "builder": {
+    "id": "https://localhost/dummy-id"
+  },
+  "buildType": "https://example.com/tekton-pipeline",
+  "invocation": {},
+  "buildConfig": {},
+  "metadata": {
+    "completeness": {
+      "parameters": false,
+      "environment": false,
+      "materials": false
+    },
+    "reproducible": false
+  },
+  "materials": []
+}
