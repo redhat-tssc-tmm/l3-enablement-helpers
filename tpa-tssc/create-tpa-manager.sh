@@ -52,7 +52,156 @@ echo ""
 
 REALM="chicken"
 
+# Create client scope "update:document"
+echo "Creating client scope 'update:document'..."
+SCOPE_DATA='{
+  "name": "update:document",
+  "description": "Client scope for document update permissions",
+  "protocol": "openid-connect",
+  "attributes": {
+    "include.in.token.scope": "true",
+    "display.on.consent.screen": "true"
+  }
+}'
 
+SCOPE_RESPONSE=$(curl -k -X POST \
+    -H "Authorization: Bearer $ACCESS_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d "$SCOPE_DATA" \
+    "$KEYCLOAK_URL/admin/realms/$REALM/client-scopes" \
+    -w "\n%{http_code}" \
+    -s)
+
+SCOPE_HTTP_CODE=$(echo "$SCOPE_RESPONSE" | tail -n1)
+SCOPE_RESPONSE_BODY=$(echo "$SCOPE_RESPONSE" | sed '$d')
+
+if [ "$SCOPE_HTTP_CODE" -eq 201 ]; then
+    echo "Client scope 'update:document' created successfully"
+elif [ "$SCOPE_HTTP_CODE" -eq 409 ]; then
+    echo "Client scope 'update:document' already exists"
+else
+    echo "Warning: Unexpected response when creating client scope (HTTP $SCOPE_HTTP_CODE)"
+    echo "Response: $SCOPE_RESPONSE_BODY"
+fi
+
+# Get client scope ID
+echo "Retrieving client scope ID for 'update:document'..."
+SCOPE_INFO=$(curl -k -X GET \
+    -H "Authorization: Bearer $ACCESS_TOKEN" \
+    "$KEYCLOAK_URL/admin/realms/$REALM/client-scopes" \
+    -s)
+
+CLIENT_SCOPE_ID=$(echo "$SCOPE_INFO" | jq -r '.[] | select(.name=="update:document") | .id')
+
+if [ -z "$CLIENT_SCOPE_ID" ]; then
+    echo "Error: Could not retrieve client scope ID for 'update:document'"
+    exit 1
+fi
+echo "Client Scope ID: $CLIENT_SCOPE_ID"
+echo ""
+
+# Get the "chicken-manager" realm role for scope assignment
+echo "Retrieving 'chicken-manager' realm role for scope assignment..."
+MANAGER_SCOPE_ROLE_INFO=$(curl -k -X GET \
+    -H "Authorization: Bearer $ACCESS_TOKEN" \
+    "$KEYCLOAK_URL/admin/realms/$REALM/roles/chicken-manager" \
+    -s)
+
+MANAGER_SCOPE_ROLE_ID=$(echo "$MANAGER_SCOPE_ROLE_INFO" | jq -r '.id')
+MANAGER_SCOPE_ROLE_NAME=$(echo "$MANAGER_SCOPE_ROLE_INFO" | jq -r '.name')
+
+if [ -z "$MANAGER_SCOPE_ROLE_ID" ]; then
+    echo "Error: Could not retrieve 'chicken-manager' role for scope assignment"
+    exit 1
+fi
+echo "Role ID for scope: $MANAGER_SCOPE_ROLE_ID"
+echo ""
+
+# Assign the "chicken-manager" role to the client scope
+echo "Assigning 'chicken-manager' role to client scope 'update:document'..."
+SCOPE_ROLE_ASSIGNMENT='[{
+  "id": "'"$MANAGER_SCOPE_ROLE_ID"'",
+  "name": "'"$MANAGER_SCOPE_ROLE_NAME"'"
+}]'
+
+SCOPE_ROLE_RESPONSE=$(curl -k -X POST \
+    -H "Authorization: Bearer $ACCESS_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d "$SCOPE_ROLE_ASSIGNMENT" \
+    "$KEYCLOAK_URL/admin/realms/$REALM/client-scopes/$CLIENT_SCOPE_ID/scope-mappings/realm" \
+    -w "\n%{http_code}" \
+    -s)
+
+SCOPE_ROLE_HTTP_CODE=$(echo "$SCOPE_ROLE_RESPONSE" | tail -n1)
+SCOPE_ROLE_RESPONSE_BODY=$(echo "$SCOPE_ROLE_RESPONSE" | sed '$d')
+
+if [ "$SCOPE_ROLE_HTTP_CODE" -eq 204 ]; then
+    echo "Role 'chicken-manager' assigned successfully to client scope 'update:document'"
+else
+    echo "Warning: Unexpected response when assigning role to scope (HTTP $SCOPE_ROLE_HTTP_CODE)"
+    echo "Response: $SCOPE_ROLE_RESPONSE_BODY"
+fi
+echo ""
+
+# Get client IDs for 'frontend' and 'cli'
+echo "Retrieving client IDs..."
+CLIENTS_INFO=$(curl -k -X GET \
+    -H "Authorization: Bearer $ACCESS_TOKEN" \
+    "$KEYCLOAK_URL/admin/realms/$REALM/clients" \
+    -s)
+
+FRONTEND_CLIENT_ID=$(echo "$CLIENTS_INFO" | jq -r '.[] | select(.clientId=="frontend") | .id')
+CLI_CLIENT_ID=$(echo "$CLIENTS_INFO" | jq -r '.[] | select(.clientId=="cli") | .id')
+
+if [ -z "$FRONTEND_CLIENT_ID" ]; then
+    echo "Warning: Could not retrieve 'frontend' client ID"
+else
+    echo "Frontend Client ID: $FRONTEND_CLIENT_ID"
+fi
+
+if [ -z "$CLI_CLIENT_ID" ]; then
+    echo "Warning: Could not retrieve 'cli' client ID"
+else
+    echo "CLI Client ID: $CLI_CLIENT_ID"
+fi
+echo ""
+
+# Add client scope to 'frontend' client
+if [ -n "$FRONTEND_CLIENT_ID" ]; then
+    echo "Adding 'update:document' client scope to 'frontend' client..."
+    FRONTEND_SCOPE_RESPONSE=$(curl -k -X PUT \
+        -H "Authorization: Bearer $ACCESS_TOKEN" \
+        "$KEYCLOAK_URL/admin/realms/$REALM/clients/$FRONTEND_CLIENT_ID/default-client-scopes/$CLIENT_SCOPE_ID" \
+        -w "\n%{http_code}" \
+        -s)
+
+    FRONTEND_SCOPE_HTTP_CODE=$(echo "$FRONTEND_SCOPE_RESPONSE" | tail -n1)
+
+    if [ "$FRONTEND_SCOPE_HTTP_CODE" -eq 204 ]; then
+        echo "Client scope added successfully to 'frontend' client"
+    else
+        echo "Warning: Unexpected response when adding scope to 'frontend' (HTTP $FRONTEND_SCOPE_HTTP_CODE)"
+    fi
+fi
+
+# Add client scope to 'cli' client
+if [ -n "$CLI_CLIENT_ID" ]; then
+    echo "Adding 'update:document' client scope to 'cli' client..."
+    CLI_SCOPE_RESPONSE=$(curl -k -X PUT \
+        -H "Authorization: Bearer $ACCESS_TOKEN" \
+        "$KEYCLOAK_URL/admin/realms/$REALM/clients/$CLI_CLIENT_ID/default-client-scopes/$CLIENT_SCOPE_ID" \
+        -w "\n%{http_code}" \
+        -s)
+
+    CLI_SCOPE_HTTP_CODE=$(echo "$CLI_SCOPE_RESPONSE" | tail -n1)
+
+    if [ "$CLI_SCOPE_HTTP_CODE" -eq 204 ]; then
+        echo "Client scope added successfully to 'cli' client"
+    else
+        echo "Warning: Unexpected response when adding scope to 'cli' (HTTP $CLI_SCOPE_HTTP_CODE)"
+    fi
+fi
+echo ""
 
 # Create user "tpa-manager"
 echo "Creating user 'tpa-manager'..."
