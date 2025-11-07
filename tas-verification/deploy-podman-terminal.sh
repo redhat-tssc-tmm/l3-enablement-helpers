@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+#set -e
 
 echo "Setting up \"Podman Terminal\" with OAuth Configuration "
 echo "========================================================"
@@ -106,7 +106,50 @@ while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
     fi
 done
 
-if [ -n "$ROUTE_URL" ]; then
+if [ -z "$ROUTE_URL" ]; then
+    echo ""
+    echo "Warning: Could not retrieve route URL after $MAX_RETRIES attempts."
+    echo "Check manually with: oc get route admin-terminal -n ttyd"
+    exit 1
+fi
+
+echo ""
+echo "Route created: https://$ROUTE_URL"
+echo ""
+echo "Waiting for pod to be ready..."
+
+# Wait for pod to be running and ready
+POD_READY=false
+MAX_POD_RETRIES=30
+POD_RETRY_COUNT=0
+
+while [ $POD_RETRY_COUNT -lt $MAX_POD_RETRIES ]; do
+    # Get pod name and status
+    POD_NAME=$(oc get pods -n ttyd -l app=ttyd-admin-terminal -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+
+    if [ -n "$POD_NAME" ]; then
+        # Check if pod is running
+        POD_STATUS=$(oc get pod "$POD_NAME" -n ttyd -o jsonpath='{.status.phase}' 2>/dev/null)
+
+        # Check if all containers are ready
+        READY_STATUS=$(oc get pod "$POD_NAME" -n ttyd -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' 2>/dev/null)
+
+        if [ "$POD_STATUS" = "Running" ] && [ "$READY_STATUS" = "True" ]; then
+            POD_READY=true
+            echo "Pod $POD_NAME is ready!"
+            break
+        else
+            echo "Attempt $((POD_RETRY_COUNT + 1))/$MAX_POD_RETRIES: Pod status: $POD_STATUS, Ready: $READY_STATUS - waiting 2 seconds..."
+        fi
+    else
+        echo "Attempt $((POD_RETRY_COUNT + 1))/$MAX_POD_RETRIES: Pod not found yet - waiting 2 seconds..."
+    fi
+
+    POD_RETRY_COUNT=$((POD_RETRY_COUNT + 1))
+    sleep 2
+done
+
+if [ "$POD_READY" = true ]; then
     echo ""
     echo "================================"
     echo "Deployment successful!"
@@ -115,6 +158,8 @@ if [ -n "$ROUTE_URL" ]; then
     echo "================================"
 else
     echo ""
-    echo "Warning: Could not retrieve route URL after $MAX_RETRIES attempts."
-    echo "Check manually with: oc get route admin-terminal -n ttyd"
+    echo "Warning: Pod did not become ready after $MAX_POD_RETRIES attempts ($(($MAX_POD_RETRIES * 2)) seconds)."
+    echo "The route is available but the pod may still be initializing."
+    echo "Check pod status with: oc get pods -n ttyd"
+    echo "Terminal URL: https://$ROUTE_URL"
 fi
