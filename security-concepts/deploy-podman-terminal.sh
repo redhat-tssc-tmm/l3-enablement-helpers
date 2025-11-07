@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+#set -e
 
 echo "Setting up \"Podman Terminal\" with OAuth Configuration "
 echo "========================================================"
@@ -125,7 +125,7 @@ POD_RETRY_COUNT=0
 
 while [ $POD_RETRY_COUNT -lt $MAX_POD_RETRIES ]; do
     # Get pod name and status
-    POD_NAME=$(oc get pods -n ttyd -l app=ttyd -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+    POD_NAME=$(oc get pods -n ttyd -l app=ttyd-admin-terminal -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
 
     if [ -n "$POD_NAME" ]; then
         # Check if pod is running
