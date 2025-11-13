@@ -51,9 +51,21 @@ else
 fi
 echo ""
 
-# Get the latest tag (sorted by version), excluding signature/attestation tags
+# Get the latest tag (sorted by creation date), excluding signature/attestation tags
 echo "Retrieving latest tag from repository..."
-LATEST_TAG=$(skopeo list-tags docker://$DEST_IMAGE | jq -r '.Tags[]' | grep -v '^sha256-' | sort -V | tail -1)
+LATEST_TAG=$(skopeo list-tags docker://$DEST_IMAGE | \
+    jq -r '.Tags[]' | \
+    grep -v '^sha256-' | \
+    while read tag; do
+        created=$(skopeo inspect docker://$DEST_IMAGE:$tag 2>/dev/null | jq -r '.Created // empty')
+        if [ -n "$created" ]; then
+            echo "$created $tag"
+        fi
+    done | \
+    sort -r | \
+    head -1 | \
+    awk '{print $2}')
+
 if [ -z "$LATEST_TAG" ]; then
     echo "Error: Could not retrieve latest tag"
     exit 1
