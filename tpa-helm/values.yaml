@@ -8,7 +8,7 @@ ingress:
 storage:
   type: s3
   region: https://s3-openshift-storage.<your-cluster-ingressdomain-here>:443
-  bucket: trustify-<run_s3.sh_from_your_namespace_to_get_the_bucket_name>
+  bucket: <run_s3.sh_from_your_namespace_to_get_the_bucket_name>
   accessKey:
     valueFrom:
       secretKeyRef:
