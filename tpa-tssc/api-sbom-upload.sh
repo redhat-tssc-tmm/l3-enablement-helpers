@@ -11,7 +11,8 @@ CLIENT_ID="cli"
 
 # Get the client secret from the oidc-cli secret in the current namespace
 #CLIENT_SECRET=$(oc get secret oidc-cli -o jsonpath='{.data.client-secret}' | base64 -d)
-CLIENT_SECRET="kN9YpPt1-QKoW-AKbu-nG71-V52fYUTHpxaT"
+#CLIENT_SECRET="kN9YpPt1-QKoW-AKbu-nG71-V52fYUTHpxaT"
+CLIENT_SECRET=$(oc get secret tpa-realm-chicken-clients -n tssc-tpa -o jsonpath='{.data.cli}' | base64 -d)
 
 # Get the access token
 TOKEN=$(curl -s -X POST "${ISSUER_URL}/protocol/openid-connect/token" \
