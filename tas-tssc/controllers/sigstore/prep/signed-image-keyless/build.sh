@@ -42,7 +42,7 @@ TOKEN_RESPONSE=$(curl -k -X POST \
     "$KEYCLOAK_URL/realms/master/protocol/openid-connect/token" \
     -s)
 
-ACCESS_TOKEN=$(echo "$TOKEN_RESPONSE" | grep -o '"access_token":"[^"]*' | cut -d'"' -f4)
+ACCESS_TOKEN=$(echo "$TOKEN_RESPONSE" | jq -r '.access_token // empty')
 
 if [ -z "$ACCESS_TOKEN" ]; then
     echo "Error: Failed to obtain access token"
@@ -97,11 +97,7 @@ GROUPS_LIST=$(curl -k -X GET \
     "$KEYCLOAK_URL/admin/realms/$REALM/groups" \
     -s)
 
-GROUP_ID=$(echo "$GROUPS_LIST" | grep -o '"id":"[^"]*","name":"technical-users"' | cut -d'"' -f4)
-if [ -z "$GROUP_ID" ]; then
-    # Try alternative parsing
-    GROUP_ID=$(echo "$GROUPS_LIST" | grep -B2 '"name":"technical-users"' | grep '"id"' | cut -d'"' -f4 | head -1)
-fi
+GROUP_ID=$(echo "$GROUPS_LIST" | jq -r '.[] | select(.name=="technical-users") | .id // empty')
 
 if [ -z "$GROUP_ID" ]; then
     echo "Error: Could not retrieve group ID for 'technical-users'"
@@ -151,7 +147,7 @@ USER_INFO=$(curl -k -X GET \
     "$KEYCLOAK_URL/admin/realms/$REALM/users?username=pipeline" \
     -s)
 
-USER_ID=$(echo "$USER_INFO" | grep -o '"id":"[^"]*' | head -1 | cut -d'"' -f4)
+USER_ID=$(echo "$USER_INFO" | jq -r '.[0].id // empty')
 
 if [ -z "$USER_ID" ]; then
     echo "Error: Could not retrieve user ID for 'pipeline'"
