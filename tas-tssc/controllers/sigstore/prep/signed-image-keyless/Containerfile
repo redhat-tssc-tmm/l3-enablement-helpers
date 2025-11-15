@@ -1,0 +1,11 @@
+FROM registry.access.redhat.com/ubi9/httpd-24:latest
+
+# Copy the HTML file to httpd's default serving directory
+COPY index.html /var/www/html/index.html
+
+# The httpd-24 image is already configured to run on port 8080
+# and has proper permissions for OpenShift
+EXPOSE 8080
+
+# Run httpd - the base image already has the correct CMD
+CMD ["/usr/bin/run-httpd"]

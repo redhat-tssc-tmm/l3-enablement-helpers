@@ -1,0 +1,63 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: demo-imagepolicies
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unsigned-image
+  namespace: demo-imagepolicies
+  labels:
+    app: unsigned-image
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: unsigned-image
+  template:
+    metadata:
+      labels:
+        app: unsigned-image
+    spec:
+      containers:
+      - name: unsigned-image
+        image: <add-image-here>
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: unsigned-image
+  namespace: demo-imagepolicies
+  labels:
+    app: unsigned-image
+spec:
+  selector:
+    app: unsigned-image
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  type: ClusterIP
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: unsigned-image
+  namespace: demo-imagepolicies
+  labels:
+    app: unsigned-image
+spec:
+  to:
+    kind: Service
+    name: unsigned-image
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
