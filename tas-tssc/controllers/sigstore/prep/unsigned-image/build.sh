@@ -44,10 +44,11 @@ echo "Timestamp: $TIMESTAMP"
 IMAGE="${QUAY_HOST}/l3-students/l3-rhads-unsigned"
 
 echo "Building image: $IMAGE_TAG"
-podman build -t "$IMAGE:${TIMESTAMP}" -t "$IMAGE:latest" .
+podman build -t "$IMAGE:${TIMESTAMP}" "$IMAGE:latest" .
 
 # Push the image
 echo "Pushing image to registry..."
-podman push "$IMAGE:${TIMESTAMP}" "$IMAGE:latest"
+podman push "$IMAGE:${TIMESTAMP}"
+podman push "$IMAGE:latest"
 
 echo "Successfully built and pushed: $IMAGE"
