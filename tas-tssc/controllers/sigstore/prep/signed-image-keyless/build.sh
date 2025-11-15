@@ -280,6 +280,10 @@ podman push "$IMAGE:latest"
 
 echo "Successfully built and pushed: $IMAGE"
 echo ""
+echo "initializing the TUF root for keyless signing"
+echo ""
+cosign initialize
+echo ""
 echo "Signing with cosign"
 
 ### Cosign uses the SIGSTORE_ID_TOKEN environment variable, if present 
