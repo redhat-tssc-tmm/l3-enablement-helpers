@@ -66,3 +66,9 @@ echo ""
 echo "Signing with cosign"
 
 cosign sign --key k8s://openshift-pipelines/signing-secrets "$IMAGE:${TIMESTAMP}"
+
+echo ""
+# Save image reference to image.env for later use
+echo "IMAGE=$IMAGE:${TIMESTAMP}" > image.env
+echo "Image reference saved to image.env"
+

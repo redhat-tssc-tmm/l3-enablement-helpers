@@ -282,7 +282,12 @@ cosign initialize
 echo ""
 echo "Signing with cosign"
 
-### Cosign uses the SIGSTORE_ID_TOKEN environment variable, if present 
+### Cosign uses the SIGSTORE_ID_TOKEN environment variable, if present
 ### we exported that above, this is the user's OIDC token.
 ### So, effectively user `pipeline-auth@demo.redhat.com` is signing the image
 cosign sign "$IMAGE:${TIMESTAMP}"
+
+echo ""
+# Save image reference to image.env for later use
+echo "IMAGE=$IMAGE:${TIMESTAMP}" > image.env
+echo "Image reference saved to image.env"

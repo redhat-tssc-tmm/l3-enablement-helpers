@@ -52,3 +52,9 @@ podman push "$IMAGE:${TIMESTAMP}"
 podman push "$IMAGE:latest"
 
 echo "Successfully built and pushed: $IMAGE"
+echo ""
+
+# Save image reference to image.env for later use
+echo "IMAGE=$IMAGE:${TIMESTAMP}" > image.env
+echo "Image reference saved to image.env"
+
