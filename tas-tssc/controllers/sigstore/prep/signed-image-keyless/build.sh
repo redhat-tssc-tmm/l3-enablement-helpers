@@ -283,28 +283,34 @@ REPO_PATH=$(echo "$IMAGE" | sed "s|${QUAY_HOST}/||")
 NAMESPACE=$(echo "$REPO_PATH" | cut -d'/' -f1)
 REPOSITORY=$(echo "$REPO_PATH" | cut -d'/' -f2)
 
-# Get current repository description (if exists)
-CURRENT_DESC=$(curl -k -X GET \
-    -H "Authorization: Bearer $QUAY_ADMIN_TOKEN" \
-    "$QUAY_URL/api/v1/repository/$NAMESPACE/$REPOSITORY" \
-    -s 2>/dev/null | jq -r '.description // "Signed container image (keyless)"')
-
-# Update repository visibility
-VISIBILITY_RESPONSE=$(curl -k -X PUT \
+# Change repository visibility to public
+VISIBILITY_RESPONSE=$(curl -k -X POST \
     -H "Authorization: Bearer $QUAY_ADMIN_TOKEN" \
     -H "Content-Type: application/json" \
-    -d "{\"visibility\": \"public\", \"description\": \"$CURRENT_DESC\"}" \
-    "$QUAY_URL/api/v1/repository/$NAMESPACE/$REPOSITORY" \
+    -d '{"visibility": "public"}' \
+    "$QUAY_URL/api/v1/repository/$NAMESPACE/$REPOSITORY/changevisibility" \
     -w "\n%{http_code}" \
     -s)
 
 VISIBILITY_HTTP_CODE=$(echo "$VISIBILITY_RESPONSE" | tail -n1)
+VISIBILITY_RESPONSE_BODY=$(echo "$VISIBILITY_RESPONSE" | sed '$d')
 
 if [ "$VISIBILITY_HTTP_CODE" -eq 200 ] || [ "$VISIBILITY_HTTP_CODE" -eq 201 ]; then
-    echo "Repository $NAMESPACE/$REPOSITORY is now public"
+    # Verify the change
+    CURRENT_VISIBILITY=$(curl -k -X GET \
+        -H "Authorization: Bearer $QUAY_ADMIN_TOKEN" \
+        "$QUAY_URL/api/v1/repository/$NAMESPACE/$REPOSITORY" \
+        -s | jq -r '.is_public // false')
+
+    if [ "$CURRENT_VISIBILITY" = "true" ]; then
+        echo "Repository $NAMESPACE/$REPOSITORY is now public"
+    else
+        echo "Warning: API returned success but repository is still private"
+        echo "Response: $VISIBILITY_RESPONSE_BODY"
+    fi
 else
     echo "Warning: Failed to make repository public (HTTP $VISIBILITY_HTTP_CODE)"
-    echo "Response: $(echo "$VISIBILITY_RESPONSE" | sed '$d')"
+    echo "Response: $VISIBILITY_RESPONSE_BODY"
 fi
 echo ""
 
