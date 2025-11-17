@@ -60,11 +60,18 @@ REPO_PATH=$(echo "$IMAGE" | sed "s|${QUAY_HOST}/||")
 NAMESPACE=$(echo "$REPO_PATH" | cut -d'/' -f1)
 REPOSITORY=$(echo "$REPO_PATH" | cut -d'/' -f2)
 
+# Get current repository description (if exists)
+CURRENT_DESC=$(curl -k -X GET \
+    -H "Authorization: Bearer $QUAY_ADMIN_TOKEN" \
+    "$QUAY_URL/api/v1/repository/$NAMESPACE/$REPOSITORY" \
+    -s 2>/dev/null | jq -r '.description // "Unsigned container image"')
+
+# Update repository visibility
 VISIBILITY_RESPONSE=$(curl -k -X PUT \
     -H "Authorization: Bearer $QUAY_ADMIN_TOKEN" \
     -H "Content-Type: application/json" \
-    -d '{"visibility": "public"}' \
-    "$QUAY_URL/api/v1/repository/$NAMESPACE/$REPOSITORY/changevisibility" \
+    -d "{\"visibility\": \"public\", \"description\": \"$CURRENT_DESC\"}" \
+    "$QUAY_URL/api/v1/repository/$NAMESPACE/$REPOSITORY" \
     -w "\n%{http_code}" \
     -s)
 
