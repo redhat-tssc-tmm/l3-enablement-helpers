@@ -54,6 +54,30 @@ podman push "$IMAGE:latest"
 echo "Successfully built and pushed: $IMAGE"
 echo ""
 
+# Make repository public via Quay API
+echo "Making repository public..."
+REPO_PATH=$(echo "$IMAGE" | sed "s|${QUAY_HOST}/||")
+NAMESPACE=$(echo "$REPO_PATH" | cut -d'/' -f1)
+REPOSITORY=$(echo "$REPO_PATH" | cut -d'/' -f2)
+
+VISIBILITY_RESPONSE=$(curl -k -X PUT \
+    -H "Authorization: Bearer $QUAY_ADMIN_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d '{"visibility": "public"}' \
+    "$QUAY_URL/api/v1/repository/$NAMESPACE/$REPOSITORY/changevisibility" \
+    -w "\n%{http_code}" \
+    -s)
+
+VISIBILITY_HTTP_CODE=$(echo "$VISIBILITY_RESPONSE" | tail -n1)
+
+if [ "$VISIBILITY_HTTP_CODE" -eq 200 ] || [ "$VISIBILITY_HTTP_CODE" -eq 201 ]; then
+    echo "Repository $NAMESPACE/$REPOSITORY is now public"
+else
+    echo "Warning: Failed to make repository public (HTTP $VISIBILITY_HTTP_CODE)"
+    echo "Response: $(echo "$VISIBILITY_RESPONSE" | sed '$d')"
+fi
+echo ""
+
 # Save image reference to image.env for later use
 echo "IMAGE=$IMAGE:${TIMESTAMP}" > image.env
 echo "Image reference saved to image.env"
