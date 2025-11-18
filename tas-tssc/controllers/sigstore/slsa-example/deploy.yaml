@@ -1,0 +1,55 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slsa-verified-signed-image
+  labels:
+    app: slsa-verified-signed-image
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: slsa-verified-signed-image
+  template:
+    metadata:
+      labels:
+        app: slsa-verified-signed-image
+    spec:
+      containers:
+      - name: slsa-verified-signed-image
+        image: $IMAGE
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: slsa-verified-signed-image
+  labels:
+    app: slsa-verified-signed-image
+spec:
+  selector:
+    app: slsa-verified-signed-image
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  type: ClusterIP
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: slsa-verified-signed-image
+  labels:
+    app: slsa-verified-signed-image
+spec:
+  to:
+    kind: Service
+    name: slsa-verified-signed-image
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
