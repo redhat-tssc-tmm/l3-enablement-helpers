@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi9/httpd-24:latest
+FROM registry.access.redhat.com/ubi9/httpd-24:9.6-1754468607
 
 # Copy the HTML file to httpd's default serving directory
 COPY index.html /var/www/html/index.html
