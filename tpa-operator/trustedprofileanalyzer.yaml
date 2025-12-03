@@ -87,9 +87,7 @@ spec:
         clientId: tpa-frontend
     issuerUrl: 'https://sso.<your-cluster-ingressdomain-here>/realms/trusted-artifact-signer'
   tls: {}
-  image:
-    fullName: 'registry.redhat.io/rhtpa/rhtpa-trustification-service-rhel9@sha256:d5cf4a5bff94b59197f668a63d29591e3bc92ee89402edc70039e592d75cb84e'
-    pullPolicy: IfNotPresent
+  image: {}
   database:
     #sslMode: require
     host:
