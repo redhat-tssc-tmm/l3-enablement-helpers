@@ -50,7 +50,7 @@ fi
 echo "Access token obtained successfully"
 echo ""
 
-REALM="chicken"
+REALM="tssc-iam"
 
 # Create client scope "update:document"
 echo "Creating client scope 'update:document'..."
@@ -100,25 +100,25 @@ fi
 echo "Client Scope ID: $CLIENT_SCOPE_ID"
 echo ""
 
-# Get the "chicken-manager" realm role for scope assignment
-echo "Retrieving 'chicken-manager' realm role for scope assignment..."
+# Get the "tssc-iam-manager" realm role for scope assignment
+echo "Retrieving 'tssc-iam-manager' realm role for scope assignment..."
 MANAGER_SCOPE_ROLE_INFO=$(curl -k -X GET \
     -H "Authorization: Bearer $ACCESS_TOKEN" \
-    "$KEYCLOAK_URL/admin/realms/$REALM/roles/chicken-manager" \
+    "$KEYCLOAK_URL/admin/realms/$REALM/roles/tssc-iam-manager" \
     -s)
 
 MANAGER_SCOPE_ROLE_ID=$(echo "$MANAGER_SCOPE_ROLE_INFO" | jq -r '.id')
 MANAGER_SCOPE_ROLE_NAME=$(echo "$MANAGER_SCOPE_ROLE_INFO" | jq -r '.name')
 
 if [ -z "$MANAGER_SCOPE_ROLE_ID" ]; then
-    echo "Error: Could not retrieve 'chicken-manager' role for scope assignment"
+    echo "Error: Could not retrieve 'tssc-iam-manager' role for scope assignment"
     exit 1
 fi
 echo "Role ID for scope: $MANAGER_SCOPE_ROLE_ID"
 echo ""
 
-# Assign the "chicken-manager" role to the client scope
-echo "Assigning 'chicken-manager' role to client scope 'update:document'..."
+# Assign the "tssc-iam-manager" role to the client scope
+echo "Assigning 'tssc-iam-manager' role to client scope 'update:document'..."
 SCOPE_ROLE_ASSIGNMENT='[{
   "id": "'"$MANAGER_SCOPE_ROLE_ID"'",
   "name": "'"$MANAGER_SCOPE_ROLE_NAME"'"
@@ -136,7 +136,7 @@ SCOPE_ROLE_HTTP_CODE=$(echo "$SCOPE_ROLE_RESPONSE" | tail -n1)
 SCOPE_ROLE_RESPONSE_BODY=$(echo "$SCOPE_ROLE_RESPONSE" | sed '$d')
 
 if [ "$SCOPE_ROLE_HTTP_CODE" -eq 204 ]; then
-    echo "Role 'chicken-manager' assigned successfully to client scope 'update:document'"
+    echo "Role 'tssc-iam-manager' assigned successfully to client scope 'update:document'"
 else
     echo "Warning: Unexpected response when assigning role to scope (HTTP $SCOPE_ROLE_HTTP_CODE)"
     echo "Response: $SCOPE_ROLE_RESPONSE_BODY"
@@ -253,36 +253,36 @@ fi
 echo "User ID: $USER_ID"
 echo ""
 
-# Get the "chicken-admin" realm role
-echo "Retrieving 'chicken-admin' realm role..."
+# Get the "tssc-iam-admin" realm role
+echo "Retrieving 'tssc-iam-admin' realm role..."
 ADMIN_ROLE_INFO=$(curl -k -X GET \
     -H "Authorization: Bearer $ACCESS_TOKEN" \
-    "$KEYCLOAK_URL/admin/realms/$REALM/roles/chicken-admin" \
+    "$KEYCLOAK_URL/admin/realms/$REALM/roles/tssc-iam-admin" \
     -s)
 
 ADMIN_ROLE_ID=$(echo "$ADMIN_ROLE_INFO" | jq -r '.id')
 ADMIN_ROLE_NAME=$(echo "$ADMIN_ROLE_INFO" | jq -r '.name')
 
 if [ -z "$ADMIN_ROLE_ID" ]; then
-    echo "Error: Could not retrieve 'chicken-admin' role"
+    echo "Error: Could not retrieve 'tssc-iam-admin' role"
     exit 1
 fi
 echo "Admin Role ID: $ADMIN_ROLE_ID"
 echo "Admin Role Name: $ADMIN_ROLE_NAME"
 echo ""
 
-# Get the "chicken-manager" realm role
-echo "Retrieving 'chicken-manager' realm role..."
+# Get the "tssc-iam-manager" realm role
+echo "Retrieving 'tssc-iam-manager' realm role..."
 MANAGER_ROLE_INFO=$(curl -k -X GET \
     -H "Authorization: Bearer $ACCESS_TOKEN" \
-    "$KEYCLOAK_URL/admin/realms/$REALM/roles/chicken-manager" \
+    "$KEYCLOAK_URL/admin/realms/$REALM/roles/tssc-iam-manager" \
     -s)
 
 MANAGER_ROLE_ID=$(echo "$MANAGER_ROLE_INFO" | jq -r '.id')
 MANAGER_ROLE_NAME=$(echo "$MANAGER_ROLE_INFO" | jq -r '.name')
 
 if [ -z "$MANAGER_ROLE_ID" ]; then
-    echo "Error: Could not retrieve 'chicken-manager' role"
+    echo "Error: Could not retrieve 'tssc-iam-manager' role"
     exit 1
 fi
 echo "Manager Role ID: $MANAGER_ROLE_ID"
@@ -290,7 +290,7 @@ echo "Manager Role Name: $MANAGER_ROLE_NAME"
 echo ""
 
 # Assign both realm roles to the user
-echo "Assigning 'chicken-admin' and 'chicken-manager' roles to user 'tpa-manager'..."
+echo "Assigning 'tssc-iam-admin' and 'tssc-iam-manager' roles to user 'tpa-manager'..."
 ROLE_ASSIGNMENT='[{
   "id": "'"$ADMIN_ROLE_ID"'",
   "name": "'"$ADMIN_ROLE_NAME"'"
@@ -311,7 +311,7 @@ ROLE_HTTP_CODE=$(echo "$ROLE_ASSIGN_RESPONSE" | tail -n1)
 ROLE_RESPONSE_BODY=$(echo "$ROLE_ASSIGN_RESPONSE" | sed '$d')
 
 if [ "$ROLE_HTTP_CODE" -eq 204 ]; then
-    echo "Roles 'chicken-admin' and 'chicken-manager' assigned successfully to user 'tpa-manager'"
+    echo "Roles 'tssc-iam-admin' and 'tssc-iam-manager' assigned successfully to user 'tpa-manager'"
 else
     echo "Warning: Unexpected response when assigning roles (HTTP $ROLE_HTTP_CODE)"
     echo "Response: $ROLE_RESPONSE_BODY"

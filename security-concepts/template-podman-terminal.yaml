@@ -108,6 +108,14 @@ data:
     # Email domains to allow (use * for any)
     email_domains = ["*"]
 
+    # Accept unverified emails. RHADS provisions `admin` with emailVerified=false,
+    # so oauth2-proxy 500s its callback: "email in id_token (admin@apps.<domain>)
+    # isn't verified". Keycloak authenticates fine - oauth2-proxy is the only
+    # consumer that checks. Learner accounts (user1...) verify, so admin alone
+    # is locked out of the terminal.
+    # RETIRE when agnosticd#9946 merges; it fixes the flag at the Keycloak source.
+    insecure_oidc_allow_unverified_email = true
+
     # Logging
     standard_logging = true
     request_logging = true
@@ -137,6 +145,15 @@ spec:
     metadata:
       labels:
         app: ttyd-admin-terminal
+      annotations:
+        # Pin intended SCC.
+        # Because terminal-admin is bound to cluster-admin, it sees
+        # every cluster SCC. SCC admission picks, not the RoleBinding.
+        # On CNV it lands on linux-bridge because linux-bridge is the
+        # most restrictive SCC willing to admit the pod given uniform
+        # SCC priority. SCC linux-bridge has readOnlyRootFilesystem.
+        # Pod can't take writes in expected places.
+        openshift.io/required-scc: privileged
     spec:
       serviceAccountName: terminal-admin
       automountServiceAccountToken: true
@@ -193,6 +210,10 @@ spec:
         securityContext:
           privileged: true
           runAsUser: 1001
+          # setup-tas-tools.sh downloads into /tmp and installs into /home/student/clitools,
+          # so the root filesystem has to be writable. Left unset, the admitting SCC's
+          # default wins and both paths are read-only.
+          readOnlyRootFilesystem: false
         volumeMounts:
         - name: workspace
           mountPath: /workspace

@@ -50,7 +50,7 @@ fi
 echo "Access token obtained successfully"
 echo ""
 
-REALM="trusted-artifact-signer"
+REALM="tssc-iam"
 
 # Create group "technical-users"
 echo "Creating group 'technical-users' in realm '$REALM'..."

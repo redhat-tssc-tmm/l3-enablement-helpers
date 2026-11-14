@@ -3,8 +3,8 @@
 # Get the cluster ingress domain
 INGRESS_DOMAIN=$(oc get ingresses.config/cluster -o jsonpath='{.spec.domain}')
 
-# Construct the ISSUER_URL (we know the realm is "chicken")
-ISSUER_URL="https://sso.${INGRESS_DOMAIN}/realms/chicken"
+# Construct the ISSUER_URL (we know the realm is "tssc-iam")
+ISSUER_URL="https://sso.${INGRESS_DOMAIN}/realms/tssc-iam"
 
 # Set the client ID
 CLIENT_ID="cli"

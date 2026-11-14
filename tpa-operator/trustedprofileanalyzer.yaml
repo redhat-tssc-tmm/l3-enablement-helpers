@@ -85,7 +85,7 @@ spec:
               name: oidc-cli
       frontend:
         clientId: tpa-frontend
-    issuerUrl: 'https://sso.<your-cluster-ingressdomain-here>/realms/trusted-artifact-signer'
+    issuerUrl: 'https://sso.<your-cluster-ingressdomain-here>/realms/tssc-iam'
   tls: {}
   image: {}
   database:

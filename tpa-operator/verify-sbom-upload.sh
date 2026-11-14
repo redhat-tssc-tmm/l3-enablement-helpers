@@ -4,7 +4,7 @@
 INGRESS_DOMAIN=$(oc get ingresses.config/cluster -o jsonpath='{.spec.domain}')
 
 # Construct the ISSUER_URL
-ISSUER_URL="https://sso.${INGRESS_DOMAIN}/realms/trusted-artifact-signer"
+ISSUER_URL="https://sso.${INGRESS_DOMAIN}/realms/tssc-iam"
 
 # Set the client ID
 CLIENT_ID="tpa-cli"

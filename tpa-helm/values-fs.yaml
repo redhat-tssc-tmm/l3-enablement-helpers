@@ -88,7 +88,7 @@ modules:
     enabled: true
 
 oidc:
-  issuerUrl: https://sso.<your-cluster-ingressdomain-here>/realms/trusted-artifact-signer
+  issuerUrl: https://sso.<your-cluster-ingressdomain-here>/realms/tssc-iam
   clients:
     frontend:
       clientId: frontend

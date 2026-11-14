@@ -52,7 +52,7 @@ fi
 echo "Access token obtained successfully"
 echo ""
 
-REALM="trusted-artifact-signer"
+REALM="tssc-iam"
 
 # Create group "technical-users"
 echo "Creating group 'technical-users' in realm '$REALM'..."
@@ -190,7 +190,7 @@ echo "================================"
 
 
 # Construct the ISSUER_URL
-ISSUER_URL="${KEYCLOAK_URL}/realms/trusted-artifact-signer"
+ISSUER_URL="${KEYCLOAK_URL}/realms/tssc-iam"
 
 # Set the client ID
 CLIENT_ID="trusted-artifact-signer"
